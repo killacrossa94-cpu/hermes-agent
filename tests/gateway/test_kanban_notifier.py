@@ -81,6 +81,20 @@ def _unseen_terminal_events(tid):
         conn.close()
 
 
+def test_completed_notification_includes_entire_event_summary(tmp_path, monkeypatch):
+    db_path = tmp_path / "completed-summary.db"
+    monkeypatch.setenv("HERMES_KANBAN_DB", str(db_path))
+    kb.init_db()
+    summary = "A" * 200 + " complete summary remains visible after character 200"
+    _create_completed_subscription(summary=summary)
+
+    adapter = RecordingAdapter()
+    asyncio.run(_run_one_notifier_tick(monkeypatch, _make_runner(adapter)))
+
+    assert len(adapter.sent) == 1
+    assert summary in adapter.sent[0]["text"]
+
+
 def test_kanban_notifier_replays_telegram_dm_topic_delivery_metadata(tmp_path, monkeypatch):
     db_path = tmp_path / "dm-topic-metadata.db"
     monkeypatch.setenv("HERMES_KANBAN_DB", str(db_path))

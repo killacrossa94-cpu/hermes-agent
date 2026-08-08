@@ -422,7 +422,7 @@ class GatewayKanbanWatchersMixin:
                                 payload_summary = str(ev.payload["summary"])
                             if payload_summary:
                                 lines = payload_summary.strip().splitlines()
-                                h = lines[0][:200] if lines else payload_summary[:200]
+                                h = lines[0] if lines else payload_summary
                                 handoff = f"\n{h}"
                             elif task and task.result:
                                 lines = task.result.strip().splitlines()
