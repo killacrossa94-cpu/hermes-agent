@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "authoritative_live_registry": "projects.db/live registry",
+  "registry_rule": "Resolve live project identity, repository and board bindings, and lifecycle state from the live registry rather than from this repository file.",
+  "project": {
+    "slug": "hermes-agent",
+    "purpose": "Provide a self-improving personal AI agent whose shared core operates across CLI, TUI, desktop, and messaging surfaces, learns through memory and skills, delegates and schedules work, and uses real terminal and browser environments with model and provider portability.",
+    "constraints": [
+      "Preserve per-conversation prompt caching, strict message-role alternation, and a byte-stable system prompt; context compression is the sole normal exception for mutating conversation context.",
+      "Keep the agent core a narrow waist and place capabilities at the least costly edge that fits: existing code, CLI plus skill, service-gated tool, plugin, or MCP before a new core tool.",
+      "Store user-facing behavioral configuration in config.yaml and reserve .env for credentials and other secrets.",
+      "Do not add speculative extension infrastructure or in-tree integrations for third-party products; use concrete consumers and standalone plugins through generic extension surfaces.",
+      "Keep dependencies reviewed and bounded or pinned, regenerate lock data when dependency declarations change, and lazy-install provider-specific or optional capabilities where supported.",
+      "Support Python 3.11 through 3.13 and preserve behavior across Linux, macOS, native Windows, and WSL2 for shared code paths.",
+      "Use profile-aware Hermes home resolution for persistent state and user-facing paths rather than hardcoded home-directory locations.",
+      "Tests must verify runtime behavior and invariants on real paths where integration boundaries matter, not source text, mutable snapshots, or change-detector values."
+    ],
+    "definition_of_done": [
+      "The reported behavior or requested capability is exercised on the real path, and fixes address the whole demonstrated bug class including relevant sibling call paths.",
+      "Relevant behavior and invariant tests pass through scripts/run_tests.sh with CI-parity isolation; sensitive resolution, configuration, security, remote, file, or network paths receive end-to-end coverage.",
+      "Manual or end-to-end verification demonstrates the changed user path, with test instructions and tested platforms recorded for review.",
+      "Security, prompt-cache, message-alternation, profile-isolation, dependency, and cross-platform impacts are evaluated where applicable.",
+      "The change is one focused logical contribution with rationale and verification documented, and its commits follow Conventional Commits."
+    ],
+    "decisions": [
+      {
+        "id": "architecture-prompt-cache",
+        "decision": "Treat prompt-cache stability and strict message alternation as core conversation invariants.",
+        "rationale": "Long-lived conversations reuse cached prefixes, so mutating prior context, toolsets, or system prompts increases cost and can corrupt provider message ordering.",
+        "status": "accepted"
+      },
+      {
+        "id": "architecture-narrow-waist",
+        "decision": "Keep the shared agent core narrow and extend capability at the edges before adding core model tools.",
+        "rationale": "Every core tool schema is paid on every model call, while skills, gated tools, plugins, and MCP preserve extensibility with a smaller permanent footprint.",
+        "status": "accepted"
+      },
+      {
+        "id": "configuration-secrets-boundary",
+        "decision": "Use config.yaml for behavioral settings and .env only for credentials and secrets.",
+        "rationale": "A single user-facing configuration system keeps settings discoverable and migratable while preserving a clear security boundary for secret material.",
+        "status": "accepted"
+      },
+      {
+        "id": "dependencies-supply-chain",
+        "decision": "Review and bound or pin dependencies, lock resolved versions, and keep optional integrations out of the default dependency surface when practical.",
+        "rationale": "Controlled resolution and a small default dependency set reduce supply-chain exposure and cross-platform installation failures.",
+        "status": "accepted"
+      },
+      {
+        "id": "portability-cross-platform",
+        "decision": "Design shared Hermes behavior for Linux, macOS, native Windows, and WSL2 rather than assuming POSIX semantics.",
+        "rationale": "Hermes is distributed across these platforms, and process, path, signal, encoding, and terminal behavior differs materially between them.",
+        "status": "accepted"
+      }
+    ]
+  },
+  "non_authoritative": [
+    "Repository copies of live Project IDs, repository locations, default-branch metadata, or Board bindings are non-authoritative.",
+    "Conversation and session context, including prior task discussions and summaries, is non-authoritative for live project identity and bindings.",
+    "Ambient active-board or active-project selection is non-authoritative; resolve the requested project explicitly through the live registry."
+  ]
+}
